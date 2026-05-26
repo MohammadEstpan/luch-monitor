@@ -1,0 +1,5 @@
+backend/.venv/
+backend/__pycache__/
+backend/collectors/__pycache__/
+*.pyc
+*.pyo
