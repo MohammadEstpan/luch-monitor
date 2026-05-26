@@ -1,0 +1,384 @@
+/* =========================================================================
+   TK-Luch (ТК-Луч) Design System — Tokens
+   Dark-first NOC UI for internal IT infrastructure monitoring
+   Bilingual (Cyrillic primary + Latin)
+
+   Brand DNA: industrial trucking livery — saturated red + warm gold,
+   on cool dark navy operational chrome. We use the brand colors loudly
+   on chrome/marketing and quietly inside the dense NOC UI so status
+   colors (alert states) keep their meaning.
+   ========================================================================= */
+
+/* ---------- Webfonts ------------------------------------------------- */
+/* Onest (Cyrillic-first humanist sans) + JetBrains Mono (engineer's mono).
+   Both SIL OFL. Onest covers body, display, and headings; JetBrains Mono
+   carries every identifier, log line, timestamp. */
+@import url("https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+:root {
+  /* ===================================================================
+     PALETTE — raw tokens. Do not consume in components; use semantic
+     tokens further down.
+     =================================================================== */
+
+  /* --- Brand red (Луч red) ----------------------------------------- */
+  /* Pulled from logo.svg gradient stops: #AD070C → #E33003.
+     Extended into a usable ramp for backgrounds, borders, hovers. */
+  --luch-red-50:  #FEEBE9;
+  --luch-red-100: #FCC8C0;
+  --luch-red-200: #F89181;
+  --luch-red-300: #F36044;
+  --luch-red-400: #E33003;   /* PRIMARY BRAND RED (light stop) */
+  --luch-red-500: #C61E08;
+  --luch-red-600: #AD070C;   /* deep stop of logo gradient */
+  --luch-red-700: #8A0408;
+  --luch-red-800: #5F0205;
+  --luch-red-900: #340103;
+
+  /* --- Brand gold (Луч gold) --------------------------------------- */
+  /* From logo.svg gradient: #FFCC01 → #FFB007 */
+  --luch-gold-50:  #FFF7D6;
+  --luch-gold-100: #FFEC9C;
+  --luch-gold-200: #FFE066;
+  --luch-gold-300: #FFD333;
+  --luch-gold-400: #FFCC01;   /* light stop */
+  --luch-gold-500: #FFB007;   /* deep stop */
+  --luch-gold-600: #D69200;
+  --luch-gold-700: #A87100;
+  --luch-gold-800: #6E4900;
+  --luch-gold-900: #3A2700;
+
+  /* --- Ink / neutrals ---------------------------------------------- */
+  /* Cool blue-black for the NOC shell. Not pure black — pure black feels
+     like a kiosk; navy-ink reads as a tool. */
+  --ink-000: #05080F;   /* deepest — behind everything */
+  --ink-050: #0A0F1A;   /* page background */
+  --ink-100: #0F1623;   /* surface / panel */
+  --ink-150: #141C2C;   /* surface raised */
+  --ink-200: #1A2335;   /* hover / pressed surface */
+  --ink-300: #232E45;   /* borders strong */
+  --ink-400: #2F3C57;   /* borders */
+  --ink-500: #485777;   /* muted icon / chart grid bright */
+  --ink-600: #6B7A99;   /* text tertiary */
+  --ink-700: #98A6C2;   /* text secondary */
+  --ink-800: #C7D1E3;   /* text primary muted */
+  --ink-900: #E6ECF6;   /* text primary */
+  --ink-999: #FFFFFF;
+
+  /* --- Interactive blue (operational accent) ----------------------- */
+  /* A cool neutral used for active nav, links, focus, primary buttons
+     INSIDE the dense product UI. Keeping the operational accent cool
+     means brand red can stay reserved for chrome + critical status. */
+  --blue-300: #5C99FF;
+  --blue-400: #3B82F6;
+  --blue-500: #2563EB;
+  --blue-600: #1D4ED8;
+
+  /* --- Status colors ----------------------------------------------- */
+  /* Calibrated for dark NOC chart legibility. Crit-red is intentionally
+     pushed slightly cooler than brand red so a critical row doesn't read
+     as "branded" — it reads as urgent. */
+  --ok-400:    #10B981;
+  --ok-500:    #059669;
+  --ok-bg:     rgba(16, 185, 129, 0.12);
+  --ok-border: rgba(16, 185, 129, 0.32);
+
+  --warn-400:    #F59E0B;
+  --warn-500:    #D97706;
+  --warn-bg:     rgba(245, 158, 11, 0.12);
+  --warn-border: rgba(245, 158, 11, 0.32);
+
+  --crit-400:    #FF3B30;        /* slightly cooler/cleaner than brand */
+  --crit-500:    #DC2626;
+  --crit-bg:     rgba(255, 59, 48, 0.12);
+  --crit-border: rgba(255, 59, 48, 0.36);
+
+  --info-400:    #3B82F6;
+  --info-bg:     rgba(59, 130, 246, 0.12);
+  --info-border: rgba(59, 130, 246, 0.32);
+
+  --muted-400:    #6B7A99;       /* unknown / no data */
+  --muted-bg:     rgba(107, 122, 153, 0.12);
+  --muted-border: rgba(107, 122, 153, 0.32);
+
+  /* --- Chart series (8-color qualitative ramp for dark bg) --------- */
+  --chart-1: #3B82F6;
+  --chart-2: #22D3EE;
+  --chart-3: #10B981;
+  --chart-4: #FFCC01;
+  --chart-5: #FF3B30;
+  --chart-6: #A78BFA;
+  --chart-7: #EC4899;
+  --chart-8: #84CC16;
+
+  /* ===================================================================
+     SEMANTIC TOKENS — consume these in components.
+     =================================================================== */
+
+  /* Surfaces */
+  --bg-app:        var(--ink-050);
+  --bg-surface:    var(--ink-100);
+  --bg-raised:     var(--ink-150);
+  --bg-hover:      var(--ink-200);
+  --bg-pressed:    var(--ink-300);
+  --bg-chrome:     var(--ink-000);    /* top bar / sidebar bg */
+  --bg-input:      var(--ink-050);
+
+  /* Foreground / text */
+  --fg-1:          var(--ink-900);
+  --fg-2:          var(--ink-700);
+  --fg-3:          var(--ink-600);
+  --fg-disabled:   var(--ink-500);
+  --fg-on-brand:   #FFFFFF;
+  --fg-on-gold:    #1A1100;        /* gold needs dark text */
+
+  /* Borders */
+  --border-1:      rgba(255, 255, 255, 0.06);
+  --border-2:      rgba(255, 255, 255, 0.10);
+  --border-3:      rgba(255, 255, 255, 0.16);
+  --border-focus:  var(--blue-400);
+
+  /* Brand semantic — used in chrome elements (topbar accent, logo,
+     login splash, hero panels). Sparingly inside dense UI. */
+  --brand-red:        var(--luch-red-400);
+  --brand-red-deep:   var(--luch-red-600);
+  --brand-red-soft:   rgba(227, 48, 3, 0.14);
+  --brand-gold:       var(--luch-gold-400);
+  --brand-gold-deep:  var(--luch-gold-500);
+  --brand-gold-soft:  rgba(255, 204, 1, 0.14);
+
+  /* Operational accent — used for interactive states inside the product
+     (active nav, links, primary buttons, focus rings, selected rows). */
+  --accent:        var(--blue-400);
+  --accent-hover:  var(--blue-300);
+  --accent-press:  var(--blue-500);
+  --accent-soft:   rgba(59, 130, 246, 0.14);
+
+  /* Status semantic */
+  --status-ok:      var(--ok-400);
+  --status-warn:    var(--warn-400);
+  --status-crit:    var(--crit-400);
+  --status-info:    var(--info-400);
+  --status-unknown: var(--muted-400);
+
+  /* ===================================================================
+     SPACING — 4 px base
+     =================================================================== */
+  --space-0:  0;
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  8px;
+  --space-4:  12px;
+  --space-5:  16px;
+  --space-6:  20px;
+  --space-7:  24px;
+  --space-8:  32px;
+  --space-9:  40px;
+  --space-10: 48px;
+  --space-11: 64px;
+  --space-12: 80px;
+
+  /* ===================================================================
+     RADII — restrained. NOC tools read as mechanical.
+     =================================================================== */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;   /* default */
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-pill: 999px;
+
+  /* ===================================================================
+     SHADOWS & GLOWS
+     =================================================================== */
+  --shadow-1: 0 1px 0 rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 4px 12px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-3: 0 12px 32px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-pop: 0 24px 48px rgba(0,0,0,0.55), 0 0 0 1px var(--border-2);
+  --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.35);
+  --glow-ok:   0 0 12px rgba(16, 185, 129, 0.45);
+  --glow-warn: 0 0 12px rgba(245, 158, 11, 0.45);
+  --glow-crit: 0 0 14px rgba(255, 59, 48, 0.55);
+  --glow-gold: 0 0 18px rgba(255, 204, 1, 0.35);
+
+  /* ===================================================================
+     TYPE
+     =================================================================== */
+  --font-sans:    "Onest", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Onest", -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --fs-xs:   11px;
+  --fs-sm:   12px;
+  --fs-base: 13px;
+  --fs-md:   14px;
+  --fs-lg:   16px;
+  --fs-xl:   18px;
+  --fs-2xl:  22px;
+  --fs-3xl:  28px;
+  --fs-4xl:  36px;
+  --fs-5xl:  48px;
+
+  --lh-tight:  1.1;
+  --lh-snug:   1.25;
+  --lh-normal: 1.45;
+  --lh-loose:  1.6;
+
+  --tracking-tight:  -0.02em;
+  --tracking-snug:   -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+  --tracking-caps:   0.08em;
+
+  /* ===================================================================
+     MOTION
+     =================================================================== */
+  --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:   cubic-bezier(0.55, 0, 0.85, 0.4);
+  --ease-std:  cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast:  120ms;
+  --dur-base:  180ms;
+  --dur-slow:  280ms;
+
+  /* ===================================================================
+     LAYOUT
+     =================================================================== */
+  --topbar-h:    52px;
+  --sidebar-w:   232px;
+  --sidebar-w-collapsed: 56px;
+  --content-pad: 24px;
+}
+
+/* =========================================================================
+   SEMANTIC TYPE CLASSES — use directly: <h1 class="t-h1">, <p class="t-body">
+   ========================================================================= */
+.t-display {
+  font-family: var(--font-display);
+  font-size: var(--fs-5xl);
+  font-weight: 800;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+.t-h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-1);
+}
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg-1);
+}
+.t-h3 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+.t-h4 {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  line-height: var(--lh-snug);
+  color: var(--fg-1);
+}
+.t-section {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg-3);
+}
+.t-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  font-weight: 400;
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+}
+.t-body-sm {
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  color: var(--fg-2);
+}
+.t-label {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--fg-2);
+}
+.t-meta {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  color: var(--fg-3);
+}
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-feature-settings: "zero" 1, "ss01" 1;
+  color: var(--fg-1);
+}
+.t-mono-lg {
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  font-feature-settings: "zero" 1, "ss01" 1;
+}
+.t-metric {
+  font-family: var(--font-display);
+  font-size: var(--fs-4xl);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+.t-metric-sm {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
+   GLOBAL RESET / BASE
+   ========================================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  color: var(--fg-1);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; }
+::selection { background: var(--accent-soft); color: var(--fg-1); }
+
+/* Scrollbars (webkit) */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--ink-300);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-400); background-clip: padding-box; }
