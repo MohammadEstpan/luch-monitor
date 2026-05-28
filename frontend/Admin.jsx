@@ -208,7 +208,7 @@ function IntegrationsSettings() {
   const platforms = [
     { k: "telegram", label: "Telegram", icon: "message",
       fields: [
-        { f: "bot_token", label: "Bot Token", placeholder: "110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" },
+        { f: "bot_token", label: "Bot Token", placeholder: "123456789:AAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
         { f: "chat_id",   label: "Chat ID",   placeholder: "-1001234567890" },
       ]},
     { k: "slack", label: "Slack", icon: "message",
