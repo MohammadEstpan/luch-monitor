@@ -3,6 +3,23 @@
 const UserContext = React.createContext(null);
 function useUser() { return React.useContext(UserContext); }
 
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  componentDidCatch(err, info) { console.error("[App] render error:", err, info); }
+  render() {
+    if (this.state.error) return (
+      <div style={{ padding: 40, fontFamily: "monospace", background: "#0a0f1a", color: "#ff6b6b", height: "100vh", overflow: "auto" }}>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>App crashed — check browser console (F12)</div>
+        <pre style={{ fontSize: 12, whiteSpace: "pre-wrap", color: "#ff6b6b" }}>{String(this.state.error)}</pre>
+        <pre style={{ fontSize: 11, whiteSpace: "pre-wrap", color: "#6b7a99", marginTop: 12 }}>{this.state.error?.stack || ""}</pre>
+        <button onClick={() => this.setState({ error: null })} style={{ marginTop: 20, padding: "8px 16px", background: "#1a2335", border: "1px solid #2f3c57", color: "#c7d1e3", borderRadius: 4, cursor: "pointer" }}>Retry</button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
 function App() {
   const [user, setUser] = React.useState(null);
   const [page, setPage] = React.useState("dashboard");
@@ -97,6 +114,6 @@ function AppAuth({ user, setUser, page, setPage }) {
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App/>);
+root.render(<ErrorBoundary><App/></ErrorBoundary>);
 
 Object.assign(window, { useUser, UserContext });

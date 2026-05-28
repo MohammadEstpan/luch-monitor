@@ -119,7 +119,7 @@ function Tasks() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(data),
               });
-              if (r.ok) setTasks(prev => [...prev, await r.json()]);
+              if (r.ok) { const created = await r.json(); setTasks(prev => [...prev, created]); }
             }
             setShowNew(false);
             setEditTask(null);

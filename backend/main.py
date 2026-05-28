@@ -397,6 +397,16 @@ async def get_veeam_sessions():
     return state.veeam.get("sessions", []) if hasattr(state, "veeam") else []
 
 
+@app.middleware("http")
+async def no_cache_static(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.endswith((".jsx", ".css", ".js", ".html")) or path == "/":
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 app.mount("/", StaticFiles(directory=str(FRONTEND), html=True), name="static")
 
 

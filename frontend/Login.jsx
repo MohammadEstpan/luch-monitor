@@ -119,7 +119,7 @@ function Login({ onSignIn }) {
             <span>{t("or", "или")}</span>
             <div style={{ flex: 1, height: 1, background: "var(--border-2)" }}/>
           </div>
-          <Button variant="secondary" size="lg" style={{ width: "100%", justifyContent: "center" }}>
+          <Button variant="secondary" size="lg" onClick={submit} style={{ width: "100%", justifyContent: "center" }}>
             {t("Single Sign-On (Active Directory)", "Единый вход (Active Directory)")}
           </Button>
         </form>
