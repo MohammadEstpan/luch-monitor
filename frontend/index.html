@@ -17,6 +17,17 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <!-- xterm.js for SSH terminal -->
+  <link rel="stylesheet" href="https://unpkg.com/xterm@4.19.0/css/xterm.css"/>
+  <script src="https://unpkg.com/xterm@4.19.0/lib/xterm.js"></script>
+  <!-- Leaflet for real-world topology map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    .luch-tooltip { background: var(--bg-raised,#1e2433); border: 1px solid #2d3748; color: #c8d3f5; font-family: monospace; font-size: 11px; border-radius: 4px; }
+    .luch-tooltip::before { display: none; }
+    .leaflet-container { background: #0d1117; }
+  </style>
 
   <script type="text/babel" data-presets="react" src="primitives.jsx"></script>
   <script type="text/babel" data-presets="react" src="data.jsx"></script>
@@ -28,6 +39,7 @@
   <script type="text/babel" data-presets="react" src="Logs.jsx"></script>
   <script type="text/babel" data-presets="react" src="Topology.jsx"></script>
   <script type="text/babel" data-presets="react" src="Admin.jsx"></script>
+  <script type="text/babel" data-presets="react" src="Tasks.jsx"></script>
   <script type="text/babel" data-presets="react" src="App.jsx"></script>
 </body>
 </html>

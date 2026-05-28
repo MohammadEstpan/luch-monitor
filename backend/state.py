@@ -1,5 +1,5 @@
 import time
-from typing import Any
+from version import VERSION, BUILD
 
 
 class AppState:
@@ -9,6 +9,10 @@ class AppState:
         self.unifi: dict = {}
         self.servers: list[dict] = []
         self.nvrs: list[dict] = []
+        self.acks: dict = {}
+        self.metrics: dict = {}
+        self.vmware_vms: list[dict] = []
+        self.veeam: dict = {}
         self.last_update: float = 0
         self.collector_errors: dict[str, str] = {}
 
@@ -33,11 +37,17 @@ class AppState:
         return {
             "type": "full",
             "ts": int(self.last_update),
+            "version": VERSION,
+            "build": BUILD,
             "branches": self.branches,
             "wazuh": self.wazuh,
             "unifi": self.unifi,
             "servers": self.servers,
             "nvrs": self.nvrs,
+            "acks": self.acks,
+            "metrics": self.metrics,
+            "vmware_vms": self.vmware_vms,
+            "veeam": self.veeam,
             "errors": self.collector_errors,
             "summary": {
                 "branches_total": len(self.branches),

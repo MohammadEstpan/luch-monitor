@@ -34,12 +34,15 @@ function Admin() {
         </aside>
 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-          {tab === "probes" && <ProbesSettings/>}
-          {tab === "agents" && <AgentsSettings/>}
-          {tab === "users"  && <UsersSettings/>}
-          {tab !== "probes" && tab !== "agents" && tab !== "users" && (
+          {tab === "probes"       && <ProbesSettings/>}
+          {tab === "agents"       && <AgentsSettings/>}
+          {tab === "users"        && <UsersSettings/>}
+          {tab === "integrations" && <IntegrationsSettings/>}
+          {tab === "retention"    && <RetentionSettings/>}
+          {tab === "audit"        && <AuditLogView/>}
+          {tab !== "probes" && tab !== "agents" && tab !== "users" && tab !== "integrations" && tab !== "retention" && tab !== "audit" && (
             <Card>
-              <EmptyState icon="settings" title={t("Coming soon", "Скоро")} description={t("This admin section is not yet implemented in the design kit.", "Этот раздел админа ещё не реализован в дизайн-ките.")}/>
+              <EmptyState icon="settings" title={t("Coming soon", "Скоро")} description={t("This section is not yet implemented.", "Этот раздел ещё не реализован.")}/>
             </Card>
           )}
         </div>
@@ -167,6 +170,182 @@ function UsersSettings() {
           { name: "Сергей Морозов",   email: "s.morozov@tk-luch.ru",   initials: "СМ", role: "engineer", depot: "МСК", last: { en: "—",        ru: "—"         }, active: false, color: "var(--ink-500)" },
         ]}
       />
+    </Card>
+  );
+}
+
+function IntegrationsSettings() {
+  const t = useT();
+  const [cfg, setCfg] = React.useState({ telegram: {}, slack: {}, teams: {} });
+  const [testResult, setTestResult] = React.useState({});
+  const [saving, setSaving] = React.useState({});
+
+  React.useEffect(() => {
+    fetch("/api/integrations").then(r => r.json()).then(setCfg).catch(() => {});
+  }, []);
+
+  const update = (platform, field, val) => {
+    setCfg(prev => ({ ...prev, [platform]: { ...prev[platform], [field]: val } }));
+  };
+
+  const save = async (platform) => {
+    setSaving(s => ({ ...s, [platform]: true }));
+    await fetch(`/api/integrations/${platform}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cfg[platform] || {}),
+    });
+    setSaving(s => ({ ...s, [platform]: false }));
+  };
+
+  const test = async (platform) => {
+    setTestResult(r => ({ ...r, [platform]: "testing…" }));
+    const r = await fetch(`/api/integrations/${platform}/test`, { method: "POST" });
+    const d = await r.json();
+    setTestResult(prev => ({ ...prev, [platform]: d.ok ? "✅ " + t("OK", "OK") : "❌ " + d.message }));
+    setTimeout(() => setTestResult(prev => ({ ...prev, [platform]: null })), 5000);
+  };
+
+  const platforms = [
+    { k: "telegram", label: "Telegram", icon: "message",
+      fields: [
+        { f: "bot_token", label: "Bot Token", placeholder: "110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw" },
+        { f: "chat_id",   label: "Chat ID",   placeholder: "-1001234567890" },
+      ]},
+    { k: "slack", label: "Slack", icon: "message",
+      fields: [{ f: "webhook_url", label: "Webhook URL", placeholder: "https://hooks.slack.com/services/…" }]},
+    { k: "teams", label: "Microsoft Teams", icon: "message",
+      fields: [{ f: "webhook_url", label: "Webhook URL", placeholder: "https://outlook.office.com/webhook/…" }]},
+  ];
+
+  return (
+    <>
+      {platforms.map(p => {
+        const pc = cfg[p.k] || {};
+        return (
+          <Card key={p.k} section={t("Notification webhook", "Webhook уведомлений")} title={p.label}
+            action={
+              <div style={{ display: "flex", gap: 8 }}>
+                {testResult[p.k] && <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-2)", alignSelf: "center" }}>{testResult[p.k]}</span>}
+                <Button onClick={() => test(p.k)}>{t("Test", "Тест")}</Button>
+                <Button variant="primary" onClick={() => save(p.k)} disabled={saving[p.k]}>
+                  {saving[p.k] ? t("Saving…", "Сохранение…") : t("Save", "Сохранить")}
+                </Button>
+              </div>
+            }>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <label style={{ fontSize: 13, color: "var(--fg-2)" }}>{t("Enable", "Включить")}</label>
+              <input type="checkbox" checked={!!pc.enabled}
+                onChange={e => update(p.k, "enabled", e.target.checked)}
+                style={{ accentColor: "var(--accent)", width: 16, height: 16 }}/>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+              {p.fields.map(f => (
+                <div key={f.f}>
+                  <label className="t-label" style={{ display: "block", marginBottom: 6 }}>{f.label}</label>
+                  <Input value={pc[f.f] || ""} onChange={e => update(p.k, f.f, e.target.value)}
+                    placeholder={f.placeholder} mono/>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
+    </>
+  );
+}
+
+function RetentionSettings() {
+  const t = useT();
+  const [cfg, setCfg] = React.useState(null);
+  const [saving, setSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    authFetch("/api/retention").then(r => r.json()).then(setCfg).catch(() => {});
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    await authFetch("/api/retention", {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cfg),
+    });
+    setSaving(false);
+  };
+
+  if (!cfg) return <div style={{ color: "var(--fg-3)", fontSize: 13 }}>{t("Loading…", "Загрузка…")}</div>;
+
+  const fields = [
+    { k: "syslog_days",                label: t("Syslog retention (days)", "Хранение syslog (дней)"),         hint: "0 = never" },
+    { k: "metrics_days",               label: t("Metrics retention (days)", "Хранение метрик (дней)"),        hint: "0 = never" },
+    { k: "audit_days",                 label: t("Audit log retention (days)", "Хранение аудита (дней)"),      hint: "0 = forever" },
+    { k: "alerts_cache",               label: t("Max cached alerts", "Кэш алертов"),                          hint: "events" },
+    { k: "logs_limit",                 label: t("Default log query limit", "Лимит запроса логов"),            hint: "events" },
+    { k: "tasks_archive_solved_days",  label: t("Archive solved tasks after (days)", "Архив решённых задач"), hint: "0 = keep" },
+  ];
+
+  return (
+    <Card section={t("Data lifecycle", "Жизненный цикл данных")} title={t("Retention policies", "Политики хранения")}
+          action={<Button variant="primary" onClick={save} disabled={saving}>{saving ? t("Saving…","Сохранение…") : t("Save","Сохранить")}</Button>}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {fields.map(f => (
+          <div key={f.k}>
+            <label className="t-label" style={{ display: "block", marginBottom: 6 }}>{f.label}</label>
+            <Input value={String(cfg[f.k] ?? 0)} mono
+              onChange={e => setCfg(prev => ({ ...prev, [f.k]: parseInt(e.target.value) || 0 }))}/>
+            <div className="t-meta" style={{ marginTop: 4, color: "var(--fg-3)" }}>{f.hint}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function AuditLogView() {
+  const t = useT();
+  const [entries, setEntries] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    setLoading(true);
+    authFetch("/api/audit?limit=200")
+      .then(r => r.json()).then(setEntries).catch(() => {}).finally(() => setLoading(false));
+  }, []);
+
+  const ACTION_COLOR = { login: "var(--status-ok)", login_fail: "var(--status-crit)", create: "var(--status-info)", update: "var(--status-warn)", delete: "var(--status-crit)", ack: "var(--fg-2)", mute: "var(--fg-2)" };
+
+  return (
+    <Card section={t("Security", "Безопасность")} title={t("Forensic audit trail", "Журнал аудита")}
+          action={<Button iconLeft="download" onClick={() => authFetch("/api/audit?limit=10000").then(r=>r.json()).then(d=>{ const a=document.createElement("a"); a.href="data:text/json,"+encodeURIComponent(JSON.stringify(d,null,2)); a.download="audit.json"; a.click(); })}>{t("Export","Экспорт")}</Button>}>
+      {loading
+        ? <div style={{ color: "var(--fg-3)", fontSize: 13 }}>{t("Loading…","Загрузка…")}</div>
+        : entries.length === 0
+          ? <EmptyState icon="eye" title={t("No audit entries yet","Записей аудита пока нет")} description={t("Actions will appear here as they occur.","Действия будут появляться здесь по мере выполнения.")}/>
+          : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr style={{ color: "var(--fg-3)", fontFamily: "var(--font-mono)", fontSize: 10 }}>
+                  {["Timestamp UTC+5","User","Action","Resource","Details","IP"].map(h => (
+                    <th key={h} style={{ textAlign: "left", padding: "4px 8px", fontWeight: 400, borderBottom: "1px solid var(--border-2)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((e, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid var(--border-1)" }}
+                    onMouseEnter={el => el.currentTarget.style.background = "var(--bg-hover)"}
+                    onMouseLeave={el => el.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)", color: "var(--fg-3)", whiteSpace: "nowrap" }}>{fmtUtc5(new Date(e.ts * 1000).toISOString())}</td>
+                    <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)", color: "var(--fg-1)" }}>{e.user}</td>
+                    <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)", color: ACTION_COLOR[e.action] || "var(--fg-2)" }}>{e.action}</td>
+                    <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)", color: "var(--fg-2)" }}>{e.resource}</td>
+                    <td style={{ padding: "6px 8px", color: "var(--fg-3)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.details}</td>
+                    <td style={{ padding: "6px 8px", fontFamily: "var(--font-mono)", color: "var(--fg-3)", fontSize: 11 }}>{e.ip}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
+      }
     </Card>
   );
 }

@@ -85,7 +85,11 @@ def _build_branch_list(hq: dict) -> list[dict]:
         result.append({
             **b,
             "lo": lo_ip,
-            "ospf": ospf_state,
+            "l2tp_ip": l2tp_ip,
+            "wg_ip": wg_ip,
+            "ovpn_ip": ovpn_ip,
+            "l2tp": ospf_state,   # L2TP OSPF neighbor state
+            "ospf": ospf_state,   # kept for backwards compat
             "bgp_wg": bgp_wg,
             "bgp_ovpn": bgp_ovpn,
             "status": status,

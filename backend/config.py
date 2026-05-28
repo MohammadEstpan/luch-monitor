@@ -100,6 +100,40 @@ SERVERS = [
     {"name": "UniFi",          "ip": "172.16.16.5",  "role": "UniFi Controller",   "org": "luch"},
     {"name": "Wazuh",          "ip": "172.16.16.100","role": "Wazuh SIEM",          "org": "luch"},
     {"name": "vCSA",           "ip": "172.16.16.20", "role": "VMware vCenter",     "org": "luch"},
-    {"name": "nginx/PMG",      "ip": "10.69.69.250", "role": "Mail Gateway",       "org": "selectel"},
+    {"name": "nginx/PMG",      "ip": "10.69.69.250", "role": "Mail Gateway",       "org": "otr-it"},
     {"name": "n8n",            "ip": "172.27.21.34", "role": "Automation",          "org": "luch"},
 ]
+
+# VMware vCenter — fill in credentials to enable VM inventory
+VCENTER = {
+    "host": "172.16.16.20",   # vcsa.otr-it.local
+    "user": "",               # TODO: set vCenter read-only user
+    "password": "",
+}
+
+# Veeam Backup & Replication — fill in to enable backup monitoring
+VEEAM = {
+    "host": "",               # TODO: set Veeam server IP
+    "port": 9419,
+    "user": "",
+    "password": "",
+}
+
+# Active Directory — primary auth via LDAP bind; local passwords are emergency fallback only
+AD = {
+    "servers":  ["172.16.16.5", "172.16.16.2"],  # primary DC, secondary DC
+    "domain":   "luch.local",
+    "netbios":  "LUCH",
+}
+
+# USERS: defines who can log in and their role.
+# Password = emergency fallback used ONLY when both DCs are unreachable.
+# Normal logins always validate against AD.
+USERS = {
+    "e.mohammad":     {"name": "Mohammad Estpan",   "role": "superadmin", "initials": "ME", "email": "e.mohammad@tk-luch.ru",     "password": "Luch2026!"},
+    "a.ustuzhaninov": {"name": "A. Ustuzhaninov",   "role": "admin",      "initials": "AU", "email": "a.ustuzhaninov@tk-luch.ru", "password": "Luch2026!"},
+    "adm":            {"name": "Administrator",      "role": "admin",      "initials": "AD", "email": "adm@tk-luch.ru",            "password": "Luch2026!"},
+    "a.ershov":       {"name": "A. Ershov",          "role": "admin",      "initials": "AE", "email": "a.ershov@tk-luch.ru",       "password": "Luch2026!"},
+    "o.demidova":     {"name": "O. Demidova",        "role": "viewer",     "initials": "OD", "email": "o.demidova@tk-luch.ru",     "password": "View2026!"},
+    "test.view":      {"name": "Test View",          "role": "viewer",     "initials": "TV", "email": "test.view@tk-luch.ru",      "password": "View2026!"},
+}

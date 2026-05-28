@@ -3,3 +3,10 @@ backend/__pycache__/
 backend/collectors/__pycache__/
 *.pyc
 *.pyo
+# runtime data
+backend/audit.jsonl
+backend/tasks.json
+backend/integrations.json
+backend/retention.json
+backend/acks.jsonl
+*.log

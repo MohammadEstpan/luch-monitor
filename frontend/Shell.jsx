@@ -1,7 +1,6 @@
 /* TK-Luch · App shell — Topbar + Sidebar + AppShell layout */
 
-function Topbar({ envs, currentEnv, setCurrentEnv, onSearch, alertCount, user, onSignOut }) {
-  const [envOpen, setEnvOpen] = React.useState(false);
+function Topbar({ envs, currentEnv, setCurrentEnv, onSearch, alertCount, user, onSignOut, data }) {
   const [meOpen, setMeOpen] = React.useState(false);
   const { lang, setLang } = useLang();
   const t = useT();
@@ -17,27 +16,14 @@ function Topbar({ envs, currentEnv, setCurrentEnv, onSearch, alertCount, user, o
         <img src="../../assets/brand-logo.svg" alt="Luch" style={{ height: 30, display: "block" }}/>
       </div>
 
-      {/* env switcher */}
-      <div style={{ position: "relative" }}>
-        <button onClick={() => setEnvOpen(o => !o)} style={{
-          display: "inline-flex", alignItems: "center", gap: 6, background: "var(--bg-surface)",
-          border: "1px solid var(--border-2)", borderRadius: 4, padding: "0 10px", height: 28,
-          color: "var(--fg-1)", fontFamily: "var(--font-mono)", fontSize: 12, cursor: "pointer",
-        }}>
-          <StatusDot status="ok" size={6}/>
-          <span>{currentEnv}</span>
-          <Icon name="chevronDown" size={12}/>
-        </button>
-        {envOpen && (
-          <div style={{ position: "absolute", top: 32, left: 0, background: "var(--bg-raised)", border: "1px solid var(--border-2)", borderRadius: 4, boxShadow: "var(--shadow-2)", padding: 4, minWidth: 160, zIndex: 20 }}>
-            {envs.map(e => (
-              <div key={e} onClick={() => { setCurrentEnv(e); setEnvOpen(false); }} style={{
-                padding: "6px 10px", fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--fg-1)",
-                cursor: "pointer", borderRadius: 3, background: e === currentEnv ? "var(--accent-soft)" : "transparent",
-              }}>{e}</div>
-            ))}
-          </div>
-        )}
+      {/* env badge */}
+      <div style={{
+        display: "inline-flex", alignItems: "center", gap: 6, background: "var(--bg-surface)",
+        border: "1px solid var(--border-2)", borderRadius: 4, padding: "0 10px", height: 28,
+        color: "var(--fg-1)", fontFamily: "var(--font-mono)", fontSize: 12,
+      }}>
+        <StatusDot status="ok" live size={6}/>
+        <span>{currentEnv}</span>
       </div>
 
       {/* search */}
@@ -144,13 +130,7 @@ function Sidebar({ nav, current, onNav }) {
         </React.Fragment>
       ))}
       <div style={{ flex: 1 }}/>
-      <div style={{
-        margin: "10px 6px", padding: "10px 12px", background: "var(--bg-surface)", border: "1px solid var(--border-2)",
-        borderRadius: 6, fontSize: 11, color: "var(--fg-3)", fontFamily: "var(--font-mono)", lineHeight: 1.5,
-      }}>
-        <div style={{ color: "var(--fg-2)", fontWeight: 600, marginBottom: 4 }}>v 2.4.1 · build 8412</div>
-        <div>{useT()("Last sync", "Синхронизация")} · 14:08 MSK</div>
-      </div>
+      <SidebarVersionBlock/>
     </aside>
   );
 }
@@ -163,6 +143,24 @@ function AppShell({ topbar, sidebar, children }) {
         {sidebar}
         <main style={{ flex: 1, overflow: "auto" }}>{children}</main>
       </div>
+    </div>
+  );
+}
+
+function SidebarVersionBlock() {
+  const { data } = useData();
+  const t = useT();
+  const v = data?.version ?? "2.4.1";
+  const b = data?.build ?? "—";
+  const ts = data?.ts;
+  const syncTime = ts ? fmtUtc5Short(new Date(ts * 1000).toISOString()) : "—";
+  return (
+    <div style={{
+      margin: "10px 6px", padding: "10px 12px", background: "var(--bg-surface)", border: "1px solid var(--border-2)",
+      borderRadius: 6, fontSize: 11, color: "var(--fg-3)", fontFamily: "var(--font-mono)", lineHeight: 1.5,
+    }}>
+      <div style={{ color: "var(--fg-2)", fontWeight: 600, marginBottom: 4 }}>v {v} · build {b}</div>
+      <div>{t("Last sync", "Синхронизация")} · {syncTime} UTC+5</div>
     </div>
   );
 }

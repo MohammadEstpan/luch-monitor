@@ -9,6 +9,8 @@ function Dashboard() {
   const wazuh    = data?.wazuh    ?? {};
   const unifi    = data?.unifi    ?? {};
 
+  const metrics   = data?.metrics ?? {};
+  const totals    = metrics.totals ?? {};
   const branchesUp   = sum.branches_up   ?? 0;
   const branchesTotal = sum.branches_total ?? 0;
   const branchesCrit  = sum.branches_crit  ?? 0;
@@ -139,6 +141,33 @@ function Dashboard() {
         </Card>
       </div>
 
+      {/* Bandwidth strip */}
+      {Object.keys(totals).length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {[
+            { key: "wg",   label: "WireGuard", color: "#10B981" },
+            { key: "ovpn", label: "OpenVPN",   color: "#22D3EE" },
+            { key: "l2tp", label: "L2TP",      color: "#F59E0B" },
+            { key: "eth",  label: "Uplink",    color: "#3B82F6" },
+          ].filter(s => totals[s.key]).map(s => {
+            const d = totals[s.key];
+            return (
+              <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--bg-surface)", border: "1px solid var(--border-2)", borderRadius: 6, padding: "6px 14px" }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color }}/>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)" }}>{s.label}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-2)" }}>
+                  <span style={{ color: "#10B981" }}>↓</span> {d.rx_fmt}
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-2)" }}>
+                  <span style={{ color: "#F59E0B" }}>↑</span> {d.tx_fmt}
+                </span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--fg-3)" }}>{d.up}/{d.count}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Lower grid */}
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 12 }}>
         {/* Branch status table */}
@@ -148,7 +177,7 @@ function Dashboard() {
               <thead>
                 <tr style={{ color: "var(--fg-3)", fontFamily: "var(--font-mono)", fontSize: 10 }}>
                   <th style={{ textAlign: "left", padding: "4px 6px", fontWeight: 400 }}>{t("Branch", "Филиал")}</th>
-                  <th style={{ textAlign: "center", padding: "4px 6px", fontWeight: 400 }}>OSPF</th>
+                  <th style={{ textAlign: "center", padding: "4px 6px", fontWeight: 400 }}>L2TP</th>
                   <th style={{ textAlign: "center", padding: "4px 6px", fontWeight: 400 }}>WG</th>
                   <th style={{ textAlign: "center", padding: "4px 6px", fontWeight: 400 }}>OVPN</th>
                   <th style={{ textAlign: "right",  padding: "4px 6px", fontWeight: 400 }}>Ping</th>

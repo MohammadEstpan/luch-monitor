@@ -105,6 +105,33 @@ def _fetch_wazuh_sync() -> dict:
     }
 
 
+def fetch_logs(limit: int = 200) -> list[dict]:
+    """Fetch recent Wazuh alerts formatted as log lines. Called from /api/logs."""
+    base = f"https://{WAZUH['host']}:{WAZUH['port']}"
+    h = _headers()
+    alerts_r = requests.get(
+        f"{base}/alerts?limit={min(limit, 500)}&sort=-timestamp",
+        headers=h, verify=False, timeout=15,
+    )
+    result = []
+    if alerts_r.ok:
+        for a in alerts_r.json().get("data", {}).get("affected_items", []):
+            level = int(a.get("rule", {}).get("level", 0))
+            sev = "crit" if level >= 12 else "warn" if level >= 7 else "info"
+            result.append({
+                "id": a.get("id", ""),
+                "sev": sev,
+                "level": level,
+                "rule": a.get("rule", {}).get("description", ""),
+                "agent": a.get("agent", {}).get("name", ""),
+                "group": (a.get("agent", {}).get("group") or [""])[0],
+                "ts": a.get("timestamp", ""),
+                "full_log": a.get("full_log", ""),
+                "decoder": a.get("decoder", {}).get("name", ""),
+            })
+    return result
+
+
 async def collect_wazuh() -> dict:
     loop = asyncio.get_event_loop()
     try:

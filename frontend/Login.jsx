@@ -3,15 +3,35 @@
 function Login({ onSignIn }) {
   const t = useT();
   const { lang, setLang } = useLang();
-  const [user, setUser] = React.useState("d.kuznetsov");
-  const [pwd, setPwd] = React.useState("••••••••••");
+  const [user, setUser] = React.useState("e.mohammad");
+  const [pwd, setPwd] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e?.preventDefault();
     if (!user || !pwd) return;
     setBusy(true);
-    setTimeout(() => { setBusy(false); onSignIn({ name: lang === "ru" ? "Дмитрий Кузнецов" : "Dmitry Kuznetsov", email: "d.kuznetsov@tk-luch.ru", initials: lang === "ru" ? "ДК" : "DK" }); }, 600);
+    setError("");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user.trim(), password: pwd }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(t(data.detail || "Invalid credentials", data.detail || "Неверный логин или пароль"));
+        setBusy(false);
+        return;
+      }
+      const data = await res.json();
+      if (data.token) setAuthToken(data.token);
+      onSignIn({ ...data, username: user.trim() });
+    } catch (err) {
+      setError(t("Server unreachable", "Сервер недоступен"));
+      setBusy(false);
+    }
   };
 
   return (
@@ -74,20 +94,24 @@ function Login({ onSignIn }) {
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
             <label className="t-label" style={{ display: "block", marginBottom: 6 }}>{t("Username", "Логин")}</label>
-            <Input value={user} onChange={e => setUser(e.target.value)} mono iconLeft="user"/>
+            <Input value={user} onChange={e => setUser(e.target.value)} placeholder="e.g. e.mohammad" mono iconLeft="user"/>
           </div>
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
               <label className="t-label">{t("Password", "Пароль")}</label>
-              <a href="#" style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none" }}>{t("Forgot?", "Забыли?")}</a>
             </div>
-            <Input value={pwd} onChange={e => setPwd(e.target.value)} type="password" mono/>
+            <Input value={pwd} onChange={e => setPwd(e.target.value)} type="password" placeholder={t("Enter your password", "Введите пароль")} mono/>
           </div>
           <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--fg-2)" }}>
             <input type="checkbox" defaultChecked style={{ accentColor: "var(--accent)" }}/>
             {t("Remember this device for 30 days", "Запомнить устройство на 30 дней")}
           </label>
-          <Button variant="brand" size="lg" type="submit" disabled={busy} style={{ marginTop: 6, width: "100%", justifyContent: "center" }}>
+          {error && (
+            <div style={{ padding: "8px 12px", background: "var(--crit-bg)", border: "1px solid var(--crit-border)", borderRadius: 4, fontSize: 12, color: "var(--status-crit)" }}>
+              {error}
+            </div>
+          )}
+          <Button variant="brand" size="lg" type="submit" disabled={busy || !user || !pwd} style={{ marginTop: 6, width: "100%", justifyContent: "center" }}>
             {busy ? t("Signing in…", "Вход…") : t("Sign in", "Войти")}
           </Button>
           <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "4px 0", color: "var(--fg-3)", fontSize: 11 }}>

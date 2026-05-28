@@ -3,6 +3,13 @@
 const WS_URL = `ws://${location.host}/ws`;
 const RECONNECT_MS = 5000;
 
+/* Auth token helpers — used by all fetch() calls */
+function getToken()           { try { return localStorage.getItem("luch-token") || ""; } catch { return ""; } }
+function setAuthToken(t)      { try { localStorage.setItem("luch-token", t); } catch {} }
+function clearAuthToken()     { try { localStorage.removeItem("luch-token"); } catch {} }
+function authHeaders()        { const t = getToken(); return t ? { "Authorization": `Bearer ${t}` } : {}; }
+function authFetch(url, opts) { return fetch(url, { ...opts, headers: { ...(opts?.headers || {}), ...authHeaders() } }); }
+
 const DataContext = React.createContext(null);
 
 function useData() {
@@ -49,7 +56,7 @@ function DataProvider({ children }) {
   }, []);
 
   function refresh() {
-    fetch("/api/refresh").catch(() => {});
+    authFetch("/api/refresh").catch(() => {});
   }
 
   return (
@@ -78,4 +85,4 @@ function WsStatusBadge() {
   );
 }
 
-Object.assign(window, { DataProvider, useData, WsStatusBadge, DataContext });
+Object.assign(window, { DataProvider, useData, WsStatusBadge, DataContext, getToken, setAuthToken, clearAuthToken, authHeaders, authFetch });

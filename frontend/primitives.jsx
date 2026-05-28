@@ -239,8 +239,51 @@ if (!document.getElementById("luch-pulse-style")) {
   document.head.appendChild(s);
 }
 
+/* ---------- OrgBadge ---------------------------------------------- */
+function OrgBadge({ org }) {
+  const styles = {
+    luch:    { bg: "rgba(59,130,246,0.15)", fg: "#60A5FA", bd: "rgba(59,130,246,0.3)",  label: "Luch" },
+    "otr-it":{ bg: "rgba(139,92,246,0.15)", fg: "#A78BFA", bd: "rgba(139,92,246,0.3)", label: "OTR-IT" },
+    shared:  { bg: "rgba(107,114,128,0.15)",fg: "#9CA3AF", bd: "rgba(107,114,128,0.3)",label: "Shared" },
+    selectel:{ bg: "rgba(239,68,68,0.12)",  fg: "#F87171", bd: "rgba(239,68,68,0.25)", label: "Selectel" },
+  };
+  const s = styles[org] || styles.luch;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", height: 18, padding: "0 6px",
+      borderRadius: 3, border: `1px solid ${s.bd}`, background: s.bg,
+      color: s.fg, fontSize: 10, fontWeight: 600, fontFamily: "var(--font-mono)",
+      letterSpacing: "0.04em", whiteSpace: "nowrap",
+    }}>{s.label}</span>
+  );
+}
+
+/* ---------- UTC+5 formatter --------------------------------------- */
+function fmtUtc5(tsIso) {
+  if (!tsIso) return "—";
+  try {
+    const d = new Date(tsIso);
+    if (isNaN(d)) return "—";
+    const utc5 = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+    const pad = n => String(n).padStart(2, "0");
+    return `${utc5.getUTCFullYear()}-${pad(utc5.getUTCMonth()+1)}-${pad(utc5.getUTCDate())} ` +
+           `${pad(utc5.getUTCHours())}:${pad(utc5.getUTCMinutes())}:${pad(utc5.getUTCSeconds())} UTC+5`;
+  } catch { return "—"; }
+}
+
+function fmtUtc5Short(tsIso) {
+  if (!tsIso) return "—";
+  try {
+    const d = new Date(tsIso);
+    if (isNaN(d)) return "—";
+    const utc5 = new Date(d.getTime() + 5 * 60 * 60 * 1000);
+    const pad = n => String(n).padStart(2, "0");
+    return `${pad(utc5.getUTCHours())}:${pad(utc5.getUTCMinutes())}:${pad(utc5.getUTCSeconds())}`;
+  } catch { return "—"; }
+}
+
 /* Export everything to window so other JSX scripts can use them */
-Object.assign(window, { Icon, Button, Badge, StatusDot, Card, MetricCard, Input, Table, EmptyState, useState, useMemo, useEffect, useRef });
+Object.assign(window, { Icon, Button, Badge, OrgBadge, StatusDot, Card, MetricCard, Input, Table, EmptyState, fmtUtc5, fmtUtc5Short, useState, useMemo, useEffect, useRef });
 
 /* ---------- Language ---------------------------------------------- */
 const LangContext = React.createContext({ lang: "ru", setLang: () => {} });

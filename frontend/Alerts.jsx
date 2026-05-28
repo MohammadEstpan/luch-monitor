@@ -13,26 +13,44 @@ function _fmtAge(tsStr) {
 function Alerts() {
   const t = useT();
   const { data } = useData();
+  const user = useUser ? useUser() : null;
   const wazuh = data?.wazuh ?? {};
   const rawAlerts = wazuh.recent_alerts ?? [];
+  const acks = data?.acks ?? {};
   const [sev, setSev] = React.useState("all");
   const [selected, setSelected] = React.useState(null);
 
-  const ALERT_DATA = rawAlerts.map((a, i) => ({
-    id: a.id || `W-${i}`,
-    sev: a.sev,
-    title: a.rule,
-    target: a.agent,
-    depot: a.group || "—",
-    fired: a.ts ? new Date(a.ts).toLocaleTimeString("ru-RU") : "—",
-    age: _fmtAge(a.ts),
-    ack: false,
-    owner: null,
-    level: a.level,
-  }));
+  const doAck = async (id, kind = "ack") => {
+    const owner = user?.name || "NOC";
+    const url = kind === "mute" ? `/api/alerts/${id}/mute?minutes=60&owner=${encodeURIComponent(owner)}`
+                                : `/api/alerts/${id}/${kind}`;
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ owner }),
+    });
+  };
+
+  const ALERT_DATA = rawAlerts.map((a, i) => {
+    const id = a.id || `W-${i}`;
+    const ackInfo = acks[id];
+    return {
+      id,
+      sev: a.sev,
+      title: a.rule,
+      target: a.agent,
+      depot: a.group || "—",
+      fired: a.ts ? fmtUtc5Short(a.ts) + " UTC+5" : "—",
+      age: _fmtAge(a.ts),
+      ack: !!ackInfo,
+      muted: ackInfo?.kind === "mute",
+      owner: ackInfo?.owner || null,
+      level: a.level,
+    };
+  });
 
   const rows = sev === "all" ? ALERT_DATA : ALERT_DATA.filter(a => a.sev === sev);
-  const sel = selected;
+  const sel = selected ? ALERT_DATA.find(a => a.id === selected.id) || selected : null;
 
   return (
     <div style={{ display: "flex", height: "100%" }}>
@@ -46,7 +64,6 @@ function Alerts() {
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <Button iconLeft="filter">{t("Filter", "Фильтр")}</Button>
             <Button iconLeft="download">{t("Export CSV", "Экспорт CSV")}</Button>
-            <Button variant="primary" iconLeft="check">{t("Acknowledge selected", "Подтвердить выбранные")}</Button>
           </div>
         </div>
 
@@ -82,7 +99,11 @@ function Alerts() {
             { header: t("Depot", "Депо"), mono: true, width: 56, cell: r => <span style={{ color: "var(--fg-3)" }}>{r.depot}</span> },
             { header: t("Fired", "Сработал"), mono: true, width: 100, cell: r => r.fired + " MSK" },
             { header: t("Age", "Возраст"),   mono: true, width: 80, align: "right", cell: r => r.age },
-            { header: t("Status", "Статус"), width: 110, cell: r => r.ack ? <Badge status="info">ACK · {r.owner}</Badge> : <Badge status={r.sev}>{r.sev === "crit" ? "P1" : r.sev === "warn" ? "P2" : "—"}</Badge> },
+            { header: t("Status", "Статус"), width: 120, cell: r =>
+              r.muted ? <Badge status="muted">MUTED · {r.owner}</Badge>
+              : r.ack  ? <Badge status="info">ACK · {r.owner}</Badge>
+              : <Badge status={r.sev}>{r.sev === "crit" ? "P1" : r.sev === "warn" ? "P2" : "—"}</Badge>
+            },
           ]}
           rows={rows}
         />
@@ -114,8 +135,19 @@ function Alerts() {
           </div>
 
           <div style={{ display: "flex", gap: 8, marginBottom: 18 }}>
-            <Button variant="primary" iconLeft="check" style={{ flex: 1, justifyContent: "center" }}>{t("Acknowledge", "Подтвердить")}</Button>
-            <Button iconLeft="mute">{t("Mute 1 h", "Заглушить 1 ч")}</Button>
+            {sel.ack
+              ? <Button iconLeft="x" style={{ flex: 1, justifyContent: "center" }}
+                  onClick={() => doAck(sel.id, "unack")}>
+                  {t("Unacknowledge", "Снять подтверждение")}
+                </Button>
+              : <Button variant="primary" iconLeft="check" style={{ flex: 1, justifyContent: "center" }}
+                  onClick={() => doAck(sel.id, "ack")}>
+                  {t("Acknowledge", "Подтвердить")}
+                </Button>
+            }
+            <Button iconLeft="mute" onClick={() => doAck(sel.id, "mute")}>
+              {t("Mute 1 h", "Заглушить 1 ч")}
+            </Button>
           </div>
 
           <div className="t-section" style={{ marginBottom: 10 }}>{t("Timeline", "Хронология")}</div>
